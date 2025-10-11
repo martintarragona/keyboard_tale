@@ -63,15 +63,16 @@ export class TextDisplay {
       blockDiv.classList.add('completed');
     }
 
-    let globalLetterIndex = 0;
-
     block.words.forEach((word, wordIndex) => {
       const wordSpan = document.createElement('span');
       wordSpan.className = 'word';
 
-      let lastLetterInWordIndex = -1;
+      // Determinar si esta palabra está en el pasado, presente o futuro
+      const isCurrentWord = isCurrentBlock && wordIndex === this.currentState.currentWordIndex;
+      const isPastWord = !isCurrentBlock || (isCurrentBlock && wordIndex < this.currentState.currentWordIndex);
 
-      // Encontrar el índice de la última letra en la palabra
+      // Encontrar el índice de la última letra en la palabra (para puntuación)
+      let lastLetterInWordIndex = -1;
       for (let i = word.characters.length - 1; i >= 0; i--) {
         if (word.characters[i].isLetter) {
           lastLetterInWordIndex = i;
@@ -79,43 +80,38 @@ export class TextDisplay {
         }
       }
 
+      // Contador de letras (solo letras, sin puntuación) en esta palabra
+      let letterIndexInWord = 0;
+
       word.characters.forEach((char, charIndex) => {
         const charSpan = document.createElement('span');
 
         if (char.isLetter) {
           charSpan.className = 'letter';
 
-          // Determinar el estado del carácter
+          // Determinar el estado del carácter basado en char.isTyped
           if (char.isTyped) {
             charSpan.classList.add('typed');
           } else if (char.isError) {
             charSpan.classList.add('error');
           }
 
-          // Marcar el carácter actual (solo en el bloque actual)
-          if (
-            isCurrentBlock &&
-            wordIndex === this.currentState.currentWordIndex &&
-            globalLetterIndex === this.currentState.currentLetterIndex
-          ) {
+          // Marcar el carácter actual (la letra que se debe escribir ahora)
+          if (isCurrentWord && letterIndexInWord === this.currentState.currentLetterIndex) {
             charSpan.classList.add('current');
           }
 
-          globalLetterIndex++;
+          letterIndexInWord++;
         } else {
           // Signos de puntuación
           charSpan.className = 'punctuation';
 
           // La puntuación se marca como "typed" solo si:
-          // - Es la última letra de una palabra completada
-          // - O si estamos en un bloque completado
-          const isWordCompleted = !isCurrentBlock ||
-            (isCurrentBlock && wordIndex < this.currentState.currentWordIndex);
-
-          const isLastLetterTyped = charIndex > lastLetterInWordIndex &&
-            word.characters[lastLetterInWordIndex]?.isTyped;
-
-          if (isWordCompleted || isLastLetterTyped) {
+          // - La palabra ya fue completada (isPastWord)
+          // - O si la última letra de la palabra actual ya fue tecleada
+          if (isPastWord) {
+            charSpan.classList.add('typed');
+          } else if (isCurrentWord && charIndex > lastLetterInWordIndex && word.characters[lastLetterInWordIndex]?.isTyped) {
             charSpan.classList.add('typed');
           }
         }
@@ -132,10 +128,7 @@ export class TextDisplay {
         space.className = 'space';
 
         // El espacio se marca como typed si la palabra anterior está completa
-        const isPrevWordCompleted = !isCurrentBlock ||
-          (isCurrentBlock && wordIndex < this.currentState.currentWordIndex);
-
-        if (isPrevWordCompleted) {
+        if (isPastWord) {
           space.classList.add('typed');
         }
 
