@@ -80,14 +80,13 @@ class KeyboardTaleApp {
         document.addEventListener('touchstart', focusInput);
         document.addEventListener('click', focusInput);
 
-        // Forward input characters to app logic
+        // Forward only the last character entered to app logic
         this.mobileInputEl.addEventListener('input', () => {
           const value = this.mobileInputEl!.value;
           if (value.length > 0) {
-            // Send each new character
-            for (const char of value) {
-              this.handleKeyPress(char);
-            }
+            // Only process the last character
+            const lastChar = value[value.length - 1];
+            this.handleKeyPress(lastChar);
             // Clear input after processing
             this.mobileInputEl!.value = '';
           }
