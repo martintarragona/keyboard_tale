@@ -81,7 +81,7 @@ class KeyboardTaleApp {
         document.addEventListener('click', focusInput);
 
         // Forward input characters to app logic
-        this.mobileInputEl.addEventListener('input', (e) => {
+        this.mobileInputEl.addEventListener('input', () => {
           const value = this.mobileInputEl!.value;
           if (value.length > 0) {
             // Send each new character
