@@ -1,0 +1,96 @@
+:root {
+  font-family: 'Courier New', monospace;
+  line-height: 1.6;
+  font-weight: 400;
+
+  --color-bg: #0a0a0a;
+  --color-text: #888;
+  --color-typed: #00ff88;
+  --color-current: #fff;
+  --color-accent: #00aaff;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  min-height: 100vh;
+  padding: 2rem;
+}
+
+#app {
+  max-width: 1200px;
+  width: 100%;
+}
+
+#text-display {
+  font-size: 1.8rem;
+  line-height: 2.2;
+  text-align: left;
+}
+
+.block {
+  margin-bottom: 2rem;
+}
+
+.letter {
+  transition: color 0.1s ease;
+}
+
+.letter.typed {
+  color: var(--color-typed);
+}
+
+.letter.current {
+  color: var(--color-current);
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0 2px;
+  border-radius: 2px;
+}
+
+.letter.error {
+  color: #ff4444;
+  animation: shake 0.3s;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+.space {
+  display: inline;
+}
+
+.space.typed {
+  /* Los espacios tipados mantienen el espacio normal */
+}
+
+.punctuation {
+  color: var(--color-text);
+  transition: color 0.1s ease;
+}
+
+.punctuation.typed {
+  color: var(--color-typed);
+}
+
+/* Animación de fundido a negro */
+#text-display.fade-to-black {
+  animation: fadeToBlack 3s ease-in-out forwards;
+}
+
+@keyframes fadeToBlack {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
