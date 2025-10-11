@@ -80,14 +80,16 @@ class KeyboardTaleApp {
         document.addEventListener('touchstart', focusInput);
         document.addEventListener('click', focusInput);
 
-        // Forward only the last character entered to app logic
+        // Forward only the single character entered to app logic
         this.mobileInputEl.addEventListener('input', () => {
           const value = this.mobileInputEl!.value;
-          if (value.length > 0) {
-            // Only process the last character
-            const lastChar = value[value.length - 1];
-            this.handleKeyPress(lastChar);
+          if (value.length === 1) {
+            this.handleKeyPress(value);
             // Clear input after processing
+            this.mobileInputEl!.value = '';
+          } else if (value.length > 1) {
+            // If for any reason more than one character, only process the first
+            this.handleKeyPress(value[0]);
             this.mobileInputEl!.value = '';
           }
         });
