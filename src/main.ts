@@ -53,6 +53,9 @@ class KeyboardTaleApp {
   private setupEventListeners(): void {
     // Listener de teclado global
     document.addEventListener('keydown', async (event) => {
+      // Prevent double handling on mobile: if hidden input is focused, skip keydown
+      if (document.activeElement === this.mobileInputEl) return;
+
       // Inicializar audio en la primera interacción
       if (!this.isAudioInitialized) {
         await this.audioEngine.initialize();
@@ -71,29 +74,29 @@ class KeyboardTaleApp {
       this.handleKeyPress(event.key);
     });
 
-      // Mobile input: focus and handle input events
-      if (this.mobileInputEl) {
-        // Focus input on touch/click to show keyboard
-        const focusInput = () => {
-          this.mobileInputEl!.focus();
-        };
-        document.addEventListener('touchstart', focusInput);
-        document.addEventListener('click', focusInput);
+    // Mobile input: focus and handle input events
+    if (this.mobileInputEl) {
+      // Focus input on touch/click to show keyboard
+      const focusInput = () => {
+        this.mobileInputEl!.focus();
+      };
+      document.addEventListener('touchstart', focusInput);
+      document.addEventListener('click', focusInput);
 
-        // Forward only the single character entered to app logic
-        this.mobileInputEl.addEventListener('input', () => {
-          const value = this.mobileInputEl!.value;
-          if (value.length === 1) {
-            this.handleKeyPress(value);
-            // Clear input after processing
-            this.mobileInputEl!.value = '';
-          } else if (value.length > 1) {
-            // If for any reason more than one character, only process the first
-            this.handleKeyPress(value[0]);
-            this.mobileInputEl!.value = '';
-          }
-        });
-      }
+      // Forward only the single character entered to app logic
+      this.mobileInputEl.addEventListener('input', () => {
+        const value = this.mobileInputEl!.value;
+        if (value.length === 1) {
+          this.handleKeyPress(value);
+          // Clear input after processing
+          this.mobileInputEl!.value = '';
+        } else if (value.length > 1) {
+          // If for any reason more than one character, only process the first
+          this.handleKeyPress(value[0]);
+          this.mobileInputEl!.value = '';
+        }
+      });
+    }
   }
 
   /**
