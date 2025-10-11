@@ -51,11 +51,8 @@ class KeyboardTaleApp {
    * Configura los event listeners
    */
   private setupEventListeners(): void {
-    // Listener de teclado global (always active for desktop)
+    // Listener de teclado global
     document.addEventListener('keydown', async (event) => {
-      // Prevent double handling on mobile: if hidden input is focused, skip keydown
-      if (this.mobileInputEl && document.activeElement === this.mobileInputEl) return;
-
       // Inicializar audio en la primera interacción
       if (!this.isAudioInitialized) {
         await this.audioEngine.initialize();
@@ -74,30 +71,27 @@ class KeyboardTaleApp {
       this.handleKeyPress(event.key);
     });
 
-    // Mobile input: focus and handle input events only on mobile devices
-    const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-    if (isMobile && this.mobileInputEl) {
-      // Focus input on touch/click to show keyboard
-      const focusInput = () => {
-        this.mobileInputEl!.focus();
-      };
-      document.addEventListener('touchstart', focusInput);
-      document.addEventListener('click', focusInput);
+      // Mobile input: focus and handle input events
+      if (this.mobileInputEl) {
+        // Focus input on touch/click to show keyboard
+        const focusInput = () => {
+          this.mobileInputEl!.focus();
+        };
+        document.addEventListener('touchstart', focusInput);
+        document.addEventListener('click', focusInput);
 
-      // Helper to process and clear input
-      const processMobileInput = () => {
-        const value = this.mobileInputEl!.value;
-        if (value.length === 1) {
-          this.handleKeyPress(value);
-          this.mobileInputEl!.value = '';
-        } else if (value.length > 1) {
-          this.handleKeyPress(value[0]);
-          this.mobileInputEl!.value = '';
-        }
-      };
-      this.mobileInputEl.addEventListener('input', processMobileInput);
-      this.mobileInputEl.addEventListener('keyup', processMobileInput);
-    }
+        // Forward only the last character entered to app logic
+        this.mobileInputEl.addEventListener('input', () => {
+          const value = this.mobileInputEl!.value;
+          if (value.length > 0) {
+            // Only process the last character
+            const lastChar = value[value.length - 1];
+            this.handleKeyPress(lastChar);
+            // Clear input after processing
+            this.mobileInputEl!.value = '';
+          }
+        });
+      }
   }
 
   /**
