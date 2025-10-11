@@ -43,13 +43,6 @@ export class TextDisplay {
       const isCurrentBlock = blockIndex === this.currentState.currentBlockIndex;
 
       this.renderBlock(block, blockIndex, isCurrentBlock);
-
-      // Agregar separación entre bloques (doble salto de línea)
-      if (blockIndex < this.currentState.currentBlockIndex) {
-        const separator = document.createElement('div');
-        separator.style.height = '2rem';
-        this.container.appendChild(separator);
-      }
     }
   }
 
@@ -159,12 +152,6 @@ export class TextDisplay {
     // Renderizar todos los bloques completos
     this.parsedText.blocks.forEach((block, blockIndex) => {
       this.renderBlock(block, blockIndex, false);
-
-      if (blockIndex < this.parsedText.blocks.length - 1) {
-        const separator = document.createElement('div');
-        separator.style.height = '2rem';
-        this.container.appendChild(separator);
-      }
     });
   }
 
