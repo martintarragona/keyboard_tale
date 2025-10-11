@@ -51,10 +51,10 @@ class KeyboardTaleApp {
    * Configura los event listeners
    */
   private setupEventListeners(): void {
-    // Listener de teclado global
+    // Listener de teclado global (always active for desktop)
     document.addEventListener('keydown', async (event) => {
       // Prevent double handling on mobile: if hidden input is focused, skip keydown
-      if (document.activeElement === this.mobileInputEl) return;
+      if (this.mobileInputEl && document.activeElement === this.mobileInputEl) return;
 
       // Inicializar audio en la primera interacción
       if (!this.isAudioInitialized) {
@@ -74,8 +74,9 @@ class KeyboardTaleApp {
       this.handleKeyPress(event.key);
     });
 
-    // Mobile input: focus and handle input events
-    if (this.mobileInputEl) {
+    // Mobile input: focus and handle input events only on mobile devices
+    const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    if (isMobile && this.mobileInputEl) {
       // Focus input on touch/click to show keyboard
       const focusInput = () => {
         this.mobileInputEl!.focus();
@@ -83,19 +84,19 @@ class KeyboardTaleApp {
       document.addEventListener('touchstart', focusInput);
       document.addEventListener('click', focusInput);
 
-      // Forward only the single character entered to app logic
-      this.mobileInputEl.addEventListener('input', () => {
+      // Helper to process and clear input
+      const processMobileInput = () => {
         const value = this.mobileInputEl!.value;
         if (value.length === 1) {
           this.handleKeyPress(value);
-          // Clear input after processing
           this.mobileInputEl!.value = '';
         } else if (value.length > 1) {
-          // If for any reason more than one character, only process the first
           this.handleKeyPress(value[0]);
           this.mobileInputEl!.value = '';
         }
-      });
+      };
+      this.mobileInputEl.addEventListener('input', processMobileInput);
+      this.mobileInputEl.addEventListener('keyup', processMobileInput);
     }
   }
 
