@@ -97,7 +97,7 @@ export class AudioEngine {
     if (this.isInitialized) return;
 
     await Tone.start();
-    console.log('Audio engine initialized (Pure Data style)');
+    //console.log('Audio engine initialized (Pure Data style)');
     this.isInitialized = true;
   }
 
@@ -137,7 +137,7 @@ export class AudioEngine {
     this.envelope.triggerAttackRelease(this.envelopeTime, now);
     this.noiseEnvelope.triggerAttackRelease(this.envelopeTime, now);
 
-    console.log(`Audio: iWord=${signal.wordIndexInBlock} (filter: ${finalFilterFreq}Hz), iChar=${signal.letterIndexInWord} (osc: ${finalOscFreq}Hz)`);
+    // console.log(`Audio: iWord=${signal.wordIndexInBlock} (filter: ${finalFilterFreq}Hz), iChar=${signal.letterIndexInWord} (osc: ${finalOscFreq}Hz)`);
   }
 
   /**
@@ -153,7 +153,7 @@ export class AudioEngine {
     this.envelope.triggerAttackRelease(0.2, now);
     this.noiseEnvelope.triggerAttackRelease(0.2, now);
 
-    console.log('Playing error sound');
+    //console.log('Playing error sound');
   }
 
   /**
