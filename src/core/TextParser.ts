@@ -1,13 +1,14 @@
-import type { ParsedText, Block, Word, Character } from '../types';
+import type { ParsedText, Block, Line, Word, Character } from '../types';
 
 /**
  * TextParser
  *
  * Responsable de parsear el texto de entrada y convertirlo en una estructura
- * de datos navegable (bloques -> palabras -> caracteres).
+ * de datos navegable (bloques -> líneas -> palabras -> caracteres).
  *
  * Los espacios y signos de puntuación se ignoran para el tecleado, pero se
  * mantienen para la visualización.
+ * Los saltos de línea simples se preservan, los dobles separan bloques.
  */
 export class TextParser {
   /**
@@ -32,11 +33,38 @@ export class TextParser {
   }
 
   /**
-   * Parsea un bloque individual en palabras
+   * Parsea un bloque individual en líneas y palabras
    */
   private static parseBlock(blockText: string): Block {
+    // Dividir en líneas (separadas por salto de línea simple)
+    const lineTexts = blockText
+      .split('\n')
+      .map(line => line.trim())
+      .filter(line => line.length > 0);
+
+    const lines: Line[] = lineTexts.map(lineText =>
+      this.parseLine(lineText)
+    );
+
+    // También crear un array plano de todas las palabras (para compatibilidad con el controlador)
+    const allWords: Word[] = [];
+    lines.forEach(line => {
+      allWords.push(...line.words);
+    });
+
+    return {
+      lines,
+      words: allWords,
+      originalText: blockText
+    };
+  }
+
+  /**
+   * Parsea una línea individual en palabras
+   */
+  private static parseLine(lineText: string): Line {
     // Dividir en palabras (separadas por espacios)
-    const wordTexts = blockText
+    const wordTexts = lineText
       .split(/\s+/)
       .filter(word => word.length > 0);
 
@@ -46,7 +74,7 @@ export class TextParser {
 
     return {
       words,
-      originalText: blockText
+      originalText: lineText
     };
   }
 

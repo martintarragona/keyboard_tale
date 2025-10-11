@@ -54,7 +54,7 @@ export class TextDisplay {
   }
 
   /**
-   * Renderiza un bloque completo
+   * Renderiza un bloque completo con sus líneas
    */
   private renderBlock(block: Block, _blockIndex: number, isCurrentBlock: boolean): void {
     const blockDiv = document.createElement('div');
@@ -63,78 +63,90 @@ export class TextDisplay {
       blockDiv.classList.add('completed');
     }
 
-    block.words.forEach((word, wordIndex) => {
-      const wordSpan = document.createElement('span');
-      wordSpan.className = 'word';
+    // Índice global de palabra en el bloque (para tracking)
+    let globalWordIndex = 0;
 
-      // Determinar si esta palabra está en el pasado, presente o futuro
-      const isCurrentWord = isCurrentBlock && wordIndex === this.currentState.currentWordIndex;
-      const isPastWord = !isCurrentBlock || (isCurrentBlock && wordIndex < this.currentState.currentWordIndex);
+    block.lines.forEach((line) => {
+      const lineDiv = document.createElement('div');
+      lineDiv.className = 'line';
 
-      // Encontrar el índice de la última letra en la palabra (para puntuación)
-      let lastLetterInWordIndex = -1;
-      for (let i = word.characters.length - 1; i >= 0; i--) {
-        if (word.characters[i].isLetter) {
-          lastLetterInWordIndex = i;
-          break;
+      line.words.forEach((word, wordIndexInLine) => {
+        const wordSpan = document.createElement('span');
+        wordSpan.className = 'word';
+
+        // Determinar si esta palabra está en el pasado, presente o futuro
+        const isCurrentWord = isCurrentBlock && globalWordIndex === this.currentState.currentWordIndex;
+        const isPastWord = !isCurrentBlock || (isCurrentBlock && globalWordIndex < this.currentState.currentWordIndex);
+
+        // Encontrar el índice de la última letra en la palabra (para puntuación)
+        let lastLetterInWordIndex = -1;
+        for (let i = word.characters.length - 1; i >= 0; i--) {
+          if (word.characters[i].isLetter) {
+            lastLetterInWordIndex = i;
+            break;
+          }
         }
-      }
 
-      // Contador de letras (solo letras, sin puntuación) en esta palabra
-      let letterIndexInWord = 0;
+        // Contador de letras (solo letras, sin puntuación) en esta palabra
+        let letterIndexInWord = 0;
 
-      word.characters.forEach((char, charIndex) => {
-        const charSpan = document.createElement('span');
+        word.characters.forEach((char, charIndex) => {
+          const charSpan = document.createElement('span');
 
-        if (char.isLetter) {
-          charSpan.className = 'letter';
+          if (char.isLetter) {
+            charSpan.className = 'letter';
 
-          // Determinar el estado del carácter basado en char.isTyped
-          if (char.isTyped) {
-            charSpan.classList.add('typed');
-          } else if (char.isError) {
-            charSpan.classList.add('error');
+            // Determinar el estado del carácter basado en char.isTyped
+            if (char.isTyped) {
+              charSpan.classList.add('typed');
+            } else if (char.isError) {
+              charSpan.classList.add('error');
+            }
+
+            // Marcar el carácter actual (la letra que se debe escribir ahora)
+            if (isCurrentWord && letterIndexInWord === this.currentState.currentLetterIndex) {
+              charSpan.classList.add('current');
+            }
+
+            letterIndexInWord++;
+          } else {
+            // Signos de puntuación
+            charSpan.className = 'punctuation';
+
+            // La puntuación se marca como "typed" solo si:
+            // - La palabra ya fue completada (isPastWord)
+            // - O si la última letra de la palabra actual ya fue tecleada
+            if (isPastWord) {
+              charSpan.classList.add('typed');
+            } else if (isCurrentWord && charIndex > lastLetterInWordIndex && word.characters[lastLetterInWordIndex]?.isTyped) {
+              charSpan.classList.add('typed');
+            }
           }
 
-          // Marcar el carácter actual (la letra que se debe escribir ahora)
-          if (isCurrentWord && letterIndexInWord === this.currentState.currentLetterIndex) {
-            charSpan.classList.add('current');
-          }
+          charSpan.textContent = char.char;
+          wordSpan.appendChild(charSpan);
+        });
 
-          letterIndexInWord++;
-        } else {
-          // Signos de puntuación
-          charSpan.className = 'punctuation';
+        lineDiv.appendChild(wordSpan);
 
-          // La puntuación se marca como "typed" solo si:
-          // - La palabra ya fue completada (isPastWord)
-          // - O si la última letra de la palabra actual ya fue tecleada
+        // Agregar espacio entre palabras en la misma línea
+        if (wordIndexInLine < line.words.length - 1) {
+          const space = document.createElement('span');
+          space.className = 'space';
+
+          // El espacio se marca como typed si la palabra anterior está completa
           if (isPastWord) {
-            charSpan.classList.add('typed');
-          } else if (isCurrentWord && charIndex > lastLetterInWordIndex && word.characters[lastLetterInWordIndex]?.isTyped) {
-            charSpan.classList.add('typed');
+            space.classList.add('typed');
           }
+
+          space.textContent = ' ';
+          lineDiv.appendChild(space);
         }
 
-        charSpan.textContent = char.char;
-        wordSpan.appendChild(charSpan);
+        globalWordIndex++;
       });
 
-      blockDiv.appendChild(wordSpan);
-
-      // Agregar espacio entre palabras
-      if (wordIndex < block.words.length - 1) {
-        const space = document.createElement('span');
-        space.className = 'space';
-
-        // El espacio se marca como typed si la palabra anterior está completa
-        if (isPastWord) {
-          space.classList.add('typed');
-        }
-
-        space.textContent = ' ';
-        blockDiv.appendChild(space);
-      }
+      blockDiv.appendChild(lineDiv);
     });
 
     this.container.appendChild(blockDiv);

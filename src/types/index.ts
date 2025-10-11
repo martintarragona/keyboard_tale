@@ -17,10 +17,19 @@ export interface Word {
 }
 
 /**
+ * Representa una línea de texto (separada por salto de línea simple)
+ */
+export interface Line {
+  words: Word[];
+  originalText: string;
+}
+
+/**
  * Representa un bloque de texto (separado por doble salto de línea)
  */
 export interface Block {
-  words: Word[];
+  lines: Line[];
+  words: Word[]; // Todas las palabras del bloque (para compatibilidad)
   originalText: string;
 }
 
