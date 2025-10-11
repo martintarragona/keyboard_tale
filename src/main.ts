@@ -16,11 +16,13 @@ class KeyboardTaleApp {
   private keyboardController: KeyboardController | null = null;
   private textDisplay: TextDisplay | null = null;
   private textDisplayEl: HTMLElement;
+  private mobileInputEl: HTMLInputElement | null = null;
   private isAudioInitialized: boolean = false;
 
   constructor() {
     // Obtener elementos del DOM
     this.textDisplayEl = document.getElementById('text-display') as HTMLElement;
+    this.mobileInputEl = document.getElementById('mobile-input') as HTMLInputElement;
 
     // Inicializar el motor de audio
     this.audioEngine = new AudioEngine();
@@ -68,6 +70,29 @@ class KeyboardTaleApp {
 
       this.handleKeyPress(event.key);
     });
+
+      // Mobile input: focus and handle input events
+      if (this.mobileInputEl) {
+        // Focus input on touch/click to show keyboard
+        const focusInput = () => {
+          this.mobileInputEl!.focus();
+        };
+        document.addEventListener('touchstart', focusInput);
+        document.addEventListener('click', focusInput);
+
+        // Forward input characters to app logic
+        this.mobileInputEl.addEventListener('input', (e) => {
+          const value = this.mobileInputEl!.value;
+          if (value.length > 0) {
+            // Send each new character
+            for (const char of value) {
+              this.handleKeyPress(char);
+            }
+            // Clear input after processing
+            this.mobileInputEl!.value = '';
+          }
+        });
+      }
   }
 
   /**
