@@ -45,14 +45,34 @@ class KeyboardTaleApp {
     if (this.textDisplay) {
       this.textDisplay.render();
     }
+
+    // En dispositivos móviles, hacer focus automático en el input
+    if (this.mobileInputEl && this.isMobileDevice()) {
+      // Pequeño delay para asegurar que el DOM está listo
+      setTimeout(() => {
+        this.mobileInputEl!.focus();
+      }, 100);
+    }
+  }
+
+  /**
+   * Detecta si es un dispositivo móvil
+   */
+  private isMobileDevice(): boolean {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
   }
 
   /**
    * Configura los event listeners
    */
   private setupEventListeners(): void {
-    // Listener de teclado global
+    // Listener de teclado global (solo para desktop, no para mobile)
     document.addEventListener('keydown', async (event) => {
+      // Si estamos en mobile, ignorar este listener (usamos el input invisible)
+      if (this.mobileInputEl && document.activeElement === this.mobileInputEl) {
+        return;
+      }
+
       // Inicializar audio en la primera interacción
       if (!this.isAudioInitialized) {
         await this.audioEngine.initialize();
@@ -71,50 +91,78 @@ class KeyboardTaleApp {
       this.handleKeyPress(event.key);
     });
 
-    // Mobile input: focus and handle input events
+    // Mobile input: handle input events
     if (this.mobileInputEl) {
-      // Focus input on touch/click to show keyboard
-      const focusInput = async (event: Event) => {
-        // Inicializar audio en la primera interacción
+      // Limpiar el input al inicio
+      this.mobileInputEl.value = '';
+
+      // Inicializar audio y controlador en el primer focus del input
+      this.mobileInputEl.addEventListener('focus', async () => {
         if (!this.isAudioInitialized) {
           await this.audioEngine.initialize();
           this.isAudioInitialized = true;
         }
 
-        // Iniciar el controlador si no está activo
         if (this.keyboardController && !this.keyboardController.getState().isActive) {
           this.keyboardController.start();
         }
+      }, { once: true });
 
-        // Evitar que el evento se propague
-        event.preventDefault();
+      // Variable para trackear si beforeinput procesó el carácter
+      let beforeInputHandled = false;
 
-        // Focus en el input para mostrar el teclado
-        this.mobileInputEl!.focus();
-      };
+      // Usar beforeinput - se dispara SOLO cuando hay input real del usuario
+      this.mobileInputEl.addEventListener('beforeinput', (event: Event) => {
+        const inputEvent = event as InputEvent;
 
-      // Solo usar touchstart para móviles, evitar click para no interferir con desktop
-      document.addEventListener('touchstart', focusInput, { passive: false });
+        // Solo procesar si realmente hay datos del usuario
+        if (inputEvent.data && inputEvent.data.length > 0) {
+          const char = inputEvent.data[0];
+          this.handleKeyPress(char);
 
-      // Forward only the last character entered to app logic
+          // Marcar que beforeinput manejó esto
+          beforeInputHandled = true;
+
+          // Prevenir que se agregue al input
+          event.preventDefault();
+
+          // Limpiar el input
+          this.mobileInputEl!.value = '';
+
+          // Reset del flag después de un tick
+          setTimeout(() => {
+            beforeInputHandled = false;
+          }, 0);
+        }
+      });
+
+      // Fallback para navegadores que no soportan beforeinput
       this.mobileInputEl.addEventListener('input', () => {
+        // Si beforeinput ya lo manejó, no hacer nada
+        if (beforeInputHandled) {
+          return;
+        }
+
         const value = this.mobileInputEl!.value;
+
+        // Solo procesar si hay un valor
         if (value.length > 0) {
-          // Only process the last character
           const lastChar = value[value.length - 1];
           this.handleKeyPress(lastChar);
-          // Clear input after processing
-          this.mobileInputEl!.value = '';
         }
+
+        // Limpiar el input
+        this.mobileInputEl!.value = '';
       });
 
       // Mantener el input siempre enfocado en móvil
       this.mobileInputEl.addEventListener('blur', () => {
-        setTimeout(() => {
-          if (this.mobileInputEl && this.keyboardController?.getState().isActive) {
-            this.mobileInputEl.focus();
-          }
-        }, 100);
+        if (this.keyboardController?.getState().isActive) {
+          // Re-enfocar después de un pequeño delay
+          setTimeout(() => {
+            this.mobileInputEl?.focus();
+          }, 50);
+        }
       });
     }
   }
