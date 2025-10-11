@@ -114,7 +114,7 @@ export class AudioEngine {
     if (!this.config.enabled || !this.isInitialized) return;
 
     if (signal.isError) {
-      this.playErrorSound();
+      // this.playErrorSound();
       return;
     }
 
