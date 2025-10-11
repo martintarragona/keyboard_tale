@@ -8,7 +8,9 @@
   <body>
     <div id="app">
       <div id="text-display"></div>
-  <input id="mobile-input" type="text" maxlength="1" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" style="position:absolute;opacity:0;width:1px;height:1px;top:0;left:0;z-index:-1;" />
+      <input id="mobile-input" type="text" maxlength="1" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+        style="position:fixed;bottom:10px;left:10px;width:40px;height:40px;opacity:0.01;border:1px solid #ccc;border-radius:8px;z-index:1000;"
+        placeholder="Tap here" />
     </div>
     <script type="module" src="/src/main.ts"></script>
   </body>
