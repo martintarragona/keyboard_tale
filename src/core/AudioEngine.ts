@@ -114,7 +114,6 @@ export class AudioEngine {
     if (!this.config.enabled || !this.isInitialized) return;
 
     if (signal.isError) {
-      // this.playErrorSound();
       return;
     }
 
@@ -138,22 +137,6 @@ export class AudioEngine {
     this.noiseEnvelope.triggerAttackRelease(this.envelopeTime, now);
 
     // console.log(`Audio: iWord=${signal.wordIndexInBlock} (filter: ${finalFilterFreq}Hz), iChar=${signal.letterIndexInWord} (osc: ${finalOscFreq}Hz)`);
-  }
-
-  /**
-   * Reproduce un sonido de error
-   */
-  private playErrorSound(): void {
-    // Sonido disonante para errores (no estaba en el patch original)
-    // Usamos frecuencias bajas y disonantes
-    this.oscillator.frequency.rampTo(50, 0.01);
-    this.lowPassFilter.frequency.rampTo(100, 0.01);
-
-    const now = Tone.now();
-    this.envelope.triggerAttackRelease(0.2, now);
-    this.noiseEnvelope.triggerAttackRelease(0.2, now);
-
-    //console.log('Playing error sound');
   }
 
   /**
