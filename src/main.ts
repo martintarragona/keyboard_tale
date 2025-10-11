@@ -71,27 +71,52 @@ class KeyboardTaleApp {
       this.handleKeyPress(event.key);
     });
 
-      // Mobile input: focus and handle input events
-      if (this.mobileInputEl) {
-        // Focus input on touch/click to show keyboard
-        const focusInput = () => {
-          this.mobileInputEl!.focus();
-        };
-        document.addEventListener('touchstart', focusInput);
-        document.addEventListener('click', focusInput);
+    // Mobile input: focus and handle input events
+    if (this.mobileInputEl) {
+      // Focus input on touch/click to show keyboard
+      const focusInput = async (event: Event) => {
+        // Inicializar audio en la primera interacción
+        if (!this.isAudioInitialized) {
+          await this.audioEngine.initialize();
+          this.isAudioInitialized = true;
+        }
 
-        // Forward only the last character entered to app logic
-        this.mobileInputEl.addEventListener('input', () => {
-          const value = this.mobileInputEl!.value;
-          if (value.length > 0) {
-            // Only process the last character
-            const lastChar = value[value.length - 1];
-            this.handleKeyPress(lastChar);
-            // Clear input after processing
-            this.mobileInputEl!.value = '';
+        // Iniciar el controlador si no está activo
+        if (this.keyboardController && !this.keyboardController.getState().isActive) {
+          this.keyboardController.start();
+        }
+
+        // Evitar que el evento se propague
+        event.preventDefault();
+
+        // Focus en el input para mostrar el teclado
+        this.mobileInputEl!.focus();
+      };
+
+      // Solo usar touchstart para móviles, evitar click para no interferir con desktop
+      document.addEventListener('touchstart', focusInput, { passive: false });
+
+      // Forward only the last character entered to app logic
+      this.mobileInputEl.addEventListener('input', () => {
+        const value = this.mobileInputEl!.value;
+        if (value.length > 0) {
+          // Only process the last character
+          const lastChar = value[value.length - 1];
+          this.handleKeyPress(lastChar);
+          // Clear input after processing
+          this.mobileInputEl!.value = '';
+        }
+      });
+
+      // Mantener el input siempre enfocado en móvil
+      this.mobileInputEl.addEventListener('blur', () => {
+        setTimeout(() => {
+          if (this.mobileInputEl && this.keyboardController?.getState().isActive) {
+            this.mobileInputEl.focus();
           }
-        });
-      }
+        }, 100);
+      });
+    }
   }
 
   /**
