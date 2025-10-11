@@ -2,9 +2,11 @@
 
 Una experiencia interactiva donde el tecleado se convierte en música.
 
+**🌐 Demo en vivo**: [https://martintarragona.github.io/keyboard_tale/](https://martintarragona.github.io/keyboard_tale/)
+
 ## Descripción
 
-Keyboard Tale es una aplicación web que transforma la escritura en una experiencia musical interactiva. Al escribir un texto predefinido, cada letra tecleada genera notas musicales basadas en su posición en el texto, creando una melodía única.
+Keyboard Tale es una aplicación web que transforma la escritura en una experiencia musical interactiva. Al escribir el poema "The Antiphanes Riddle", cada letra tecleada genera texturas sonoras únicas basadas en síntesis granular, creando una experiencia auditiva inmersiva.
 
 ## Características
 
@@ -134,11 +136,48 @@ this.loadText(nuevoTexto);
 
 ## Despliegue Web
 
-El proyecto está listo para ser desplegado en cualquier plataforma de hosting estático:
+El proyecto está configurado para desplegarse automáticamente en **GitHub Pages** mediante GitHub Actions.
+
+### Despliegue Automático (Recomendado)
+
+Cada vez que hagas push a `main` o `master`, el proyecto se desplegará automáticamente:
+
+1. Haz cambios en el código
+2. Commit y push:
+   ```bash
+   git add .
+   git commit -m "tu mensaje"
+   git push origin main
+   ```
+3. GitHub Actions compilará y desplegará automáticamente
+4. Visita: `https://[tu-usuario].github.io/keyboard_tale/`
+
+### Despliegue Manual
+
+Si prefieres desplegar manualmente:
+
+```bash
+npm run deploy
+```
+
+Esto compilará el proyecto y lo subirá a la rama `gh-pages`.
+
+### Configuración de GitHub Pages
+
+El proyecto ya está configurado, pero si necesitas habilitarlo:
+
+1. Ve a tu repositorio en GitHub
+2. Settings → Pages
+3. Source: **GitHub Actions**
+4. El workflow `.github/workflows/deploy.yml` se encargará del resto
+
+### Otras Plataformas
+
+El proyecto también puede desplegarse en:
 
 - **Vercel**: `vercel deploy`
 - **Netlify**: `netlify deploy`
-- **GitHub Pages**: Configura el workflow de GitHub Actions
+- **Cualquier hosting estático**: Sube la carpeta `dist/` después de ejecutar `npm run build`
 
 ## Licencia
 
