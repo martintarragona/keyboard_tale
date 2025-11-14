@@ -76,6 +76,16 @@ export interface TypingState {
 }
 
 /**
+ * Modos de síntesis disponibles
+ */
+export type SynthesisMode =
+  | 'granular'      // Modo original (Pure Data inspired)
+  | 'pentatonic'    // Escala pentatónica
+  | 'harmonic'      // Serie armónica
+  | 'microtonal'    // Escala microtonal
+  | 'ambient';      // Modo ambiental con delays largos
+
+/**
  * Configuración del motor de audio
  */
 export interface AudioConfig {
@@ -83,4 +93,10 @@ export interface AudioConfig {
   enabled: boolean;
   noteDuration: string;
   baseOctave: number;
+  synthesisMode: SynthesisMode;
+  reverbEnabled: boolean;
+  reverbAmount: number;
+  delayEnabled: boolean;
+  delayAmount: number;
+  panningEnabled: boolean;
 }
