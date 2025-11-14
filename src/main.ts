@@ -168,8 +168,24 @@ class KeyboardTaleApp {
       });
 
       // Mantener el input siempre enfocado en móvil
-      this.mobileInputEl.addEventListener('blur', () => {
+      this.mobileInputEl.addEventListener('blur', (e) => {
         if (this.keyboardController?.getState().isActive) {
+          // Verificar si el blur fue causado por interacción con el panel de audio
+          const relatedTarget = e.relatedTarget as HTMLElement;
+          const audioControls = document.getElementById('audio-controls');
+
+          // Si el foco se mueve al panel de audio o a sus elementos, no re-enfocar
+          if (relatedTarget && audioControls && audioControls.contains(relatedTarget)) {
+            return;
+          }
+
+          // Verificar si el panel de audio está visible
+          if (audioControls && !audioControls.classList.contains('hidden')) {
+            // Si el panel está visible, esperar un poco más para ver si el usuario está interactuando
+            // No re-enfocar inmediatamente para permitir interacción con controles
+            return;
+          }
+
           // Re-enfocar después de un pequeño delay
           setTimeout(() => {
             this.mobileInputEl?.focus();

@@ -22,12 +22,12 @@ export class AudioUI {
     this.container = this.createContainer();
     document.body.appendChild(this.container);
 
-    // Añadir listener para toggle con tecla 'C'
+    // Añadir listener para toggle con tecla 'Ctrl+C'
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'c' || e.key === 'C') {
-        if (!e.ctrlKey && !e.altKey && !e.metaKey) {
-          this.toggle();
-        }
+      // Solo activar con Ctrl+C (o Cmd+C en Mac)
+      if ((e.key === 'c' || e.key === 'C') && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault(); // Prevenir comportamiento por defecto de copiar
+        this.toggle();
       }
     });
   }
@@ -165,7 +165,7 @@ export class AudioUI {
       </div>
 
       <div class="audio-controls-footer">
-        <p class="hint">Press 'C' to toggle this panel</p>
+        <p class="hint">Press 'Ctrl+C' to toggle this panel</p>
       </div>
     `;
   }
@@ -174,6 +174,15 @@ export class AudioUI {
    * Adjunta event listeners a los controles
    */
   private attachEventListeners(): void {
+    // Prevenir que clicks dentro del panel cierren el dropdown
+    this.container.addEventListener('mousedown', (e) => {
+      e.stopPropagation();
+    });
+
+    this.container.addEventListener('click', (e) => {
+      e.stopPropagation();
+    });
+
     // Close button
     const closeBtn = document.getElementById('audio-close-btn');
     closeBtn?.addEventListener('click', () => this.hide());
@@ -258,6 +267,23 @@ export class AudioUI {
   hide(): void {
     this.container.classList.add('hidden');
     this.isVisible = false;
+
+    // En móvil, re-enfocar el input invisible cuando se cierra el panel
+    if (this.isMobileDevice()) {
+      const mobileInput = document.getElementById('mobile-input') as HTMLInputElement;
+      if (mobileInput) {
+        setTimeout(() => {
+          mobileInput.focus();
+        }, 100);
+      }
+    }
+  }
+
+  /**
+   * Detecta si es un dispositivo móvil
+   */
+  private isMobileDevice(): boolean {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
   }
 
   /**

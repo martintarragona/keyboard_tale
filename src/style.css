@@ -286,6 +286,7 @@ body {
     bottom: 20px;
     transform: none;
     max-width: none;
+    z-index: 500; /* Menor que el mobile-input (1000) para que no interfiera */
   }
 
   .audio-controls.hidden {
