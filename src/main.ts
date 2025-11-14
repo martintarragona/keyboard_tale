@@ -2,6 +2,7 @@ import './style.css';
 import { TextParser } from './core/TextParser';
 import { KeyboardController } from './core/KeyboardController';
 import { AudioEngine } from './core/AudioEngine';
+import { AudioUI } from './core/AudioUI';
 import { TextDisplay } from './core/TextDisplay';
 import type { AudioSignal, TypingState } from './types';
 
@@ -13,6 +14,7 @@ import taleText from './data/texts/tale.txt?raw';
  */
 class KeyboardTaleApp {
   private audioEngine: AudioEngine;
+  private audioUI: AudioUI | null = null;
   private keyboardController: KeyboardController | null = null;
   private textDisplay: TextDisplay | null = null;
   private textDisplayEl: HTMLElement;
@@ -77,6 +79,11 @@ class KeyboardTaleApp {
       if (!this.isAudioInitialized) {
         await this.audioEngine.initialize();
         this.isAudioInitialized = true;
+
+        // Inicializar UI de audio
+        if (!this.audioUI) {
+          this.audioUI = new AudioUI(this.audioEngine);
+        }
       }
 
       // Iniciar el controlador si no está activo
@@ -101,6 +108,11 @@ class KeyboardTaleApp {
         if (!this.isAudioInitialized) {
           await this.audioEngine.initialize();
           this.isAudioInitialized = true;
+
+          // Inicializar UI de audio
+          if (!this.audioUI) {
+            this.audioUI = new AudioUI(this.audioEngine);
+          }
         }
 
         if (this.keyboardController && !this.keyboardController.getState().isActive) {
